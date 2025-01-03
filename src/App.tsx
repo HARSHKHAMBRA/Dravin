@@ -12,8 +12,7 @@ import { IntegrationPage } from './pages/IntegrationPage';
 import { Products } from './pages/Products';
 import { BatchUpload } from './pages/BatchUpload';
 import { CreateBatch } from './components/CreateBatch';
-import { CallsFlow } from './ivr/ivrservices/CallsFlow';
-import { IvrFlow } from './ivr/IvrFlow'; // Corrected import name for IvrFlow
+import { CallingPage } from './components/CallingComponent'; // Assume a private route for protected pages
 
 function App() {
   return (
@@ -34,7 +33,7 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/BatchUpload" element={<BatchUpload />} /> {/* Fixed path */}
             <Route path="/create-batch" element={<CreateBatch />} />
-            <Route path="/calls-flow" element={<CallsFlow />} />
+            <Route path="/calls-flow" element={<CallingPage />} />
           </Routes>
         </main>
       </div>
