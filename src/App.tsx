@@ -8,11 +8,12 @@ import { CustomersPage } from './pages/CustomersPage';
 import { MessagesPage } from './pages/MessagesPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { DocumentationPage } from './pages/DocumentationPage';
-import { IntegrationPage } from './pages/IntegrationPage'; // No need for .tsx extension
-import { Products } from './pages/Products'; // No need for .tsx extension
-import { BatchUpload } from './pages/BatchUpload'; // No need for .tsx extension
-import { CreateBatch } from './components/CreateBatch';  // Assuming CreateBatch is in the same folder
-import ivrflow from './ivr/IvrFlow'; // Import the ivrflow component
+import { IntegrationPage } from './pages/IntegrationPage';
+import { Products } from './pages/Products';
+import { BatchUpload } from './pages/BatchUpload';
+import { CreateBatch } from './components/CreateBatch';
+import { CallsFlow } from './ivr/ivrservices/CallsFlow';
+import { IvrFlow } from './ivr/IvrFlow'; // Corrected import name for IvrFlow
 
 function App() {
   return (
@@ -30,10 +31,10 @@ function App() {
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/documentation" element={<DocumentationPage />} />
             <Route path="/integrations" element={<IntegrationPage />} />
-            <Route path="/products" element={<Products />} /> {/* Fixed path */}
+            <Route path="/products" element={<Products />} />
             <Route path="/BatchUpload" element={<BatchUpload />} /> {/* Fixed path */}
             <Route path="/create-batch" element={<CreateBatch />} />
-            <Route path="/ivrflow" element={<ivrflow />} /> {/* New route for ivrflow */}
+            <Route path="/calls-flow" element={<CallsFlow />} />
           </Routes>
         </main>
       </div>
