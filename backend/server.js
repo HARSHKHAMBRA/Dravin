@@ -1,81 +1,69 @@
-// Import required modules
 const express = require('express');
-const cors = require('cors');
-const mysql = require('mysql');
-const jwt = require('jsonwebtoken');
-require('dotenv').config(); // To use environment variables
+const productService = require('./productService');
+const mysql = require('mysql2/promise');
+const dotenv = require('dotenv');
+const cors = require('cors'); // Import the CORS package
 
-// Initialize Express app
+dotenv.config();
+
 const app = express();
+const port = 3000;
 
-// Middleware
-app.use(express.json()); // Parse JSON requests
-app.use(cors()); // Enable CORS
+// MySQL connection setup
+let pool;
 
-// MySQL Database Configuration
-const db = mysql.createConnection({
-    host: process.env.DB_HOST || '127.0.0.1',
-    user: process.env.DB_USER || 'root',
-    password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'calling_crm',
-});
-
-// Connect to the database
-db.connect((err) => {
-    if (err) {
-        console.error('Error connecting to the database:', err.message);
-    } else {
-        console.log('Connected to the MySQL database.');
-    }
-});
-
-// Token Generation Helper Function
-const generateToken = (user) => {
-    return jwt.sign(user, process.env.JWT_SECRET || 'default_secret', {
-        expiresIn: '1h',
+// Initialize MySQL pool connection
+const initDbConnection = async () => {
+  try {
+    pool = await mysql.createPool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      waitForConnections: true,
+      connectionLimit: 10,
+      queueLimit: 0,
     });
+    console.log('MySQL connection established');
+  } catch (err) {
+    console.error('Error initializing MySQL connection:', err.message);
+    process.exit(1); // Exit process if DB connection fails
+  }
 };
 
-// Routes
-app.get('/', (req, res) => {
-    res.send('Backend is running!');
+// Use CORS middleware to allow cross-origin requests
+app.use(cors()); // This will allow all origins by default
+
+// Endpoint to get all products
+app.get('/products', async (req, res) => {
+  try {
+    const products = await productService.getAllProducts(pool);
+    res.json(products);
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Error fetching products' });
+  }
 });
 
-// Example Protected Route
-app.post('/login', (req, res) => {
-    const { username, password } = req.body;
-
-    // Replace this with actual database query and validation
-    if (username === 'admin' && password === 'password') {
-        const token = generateToken({ username });
-        res.json({ token });
+// Endpoint to get a product by ID
+app.get('/products/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const product = await productService.getProductById(id, pool);
+    if (product) {
+      res.json(product);
     } else {
-        res.status(401).json({ message: 'Invalid credentials' });
+      res.status(404).json({ error: 'Product not found' });
     }
+  } catch (error) {
+    console.error('Error fetching product by ID:', error);
+    res.status(500).json({ error: 'Error fetching product' });
+  }
 });
 
-// Middleware to Verify Token
-const verifyToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) {
-        return res.status(403).json({ message: 'No token provided' });
-    }
-    jwt.verify(token, process.env.JWT_SECRET || 'default_secret', (err, decoded) => {
-        if (err) {
-            return res.status(401).json({ message: 'Failed to authenticate token' });
-        }
-        req.user = decoded;
-        next();
-    });
-};
-
-// Example of Protected Route
-app.get('/protected', verifyToken, (req, res) => {
-    res.json({ message: 'Welcome to the protected route!', user: req.user });
-});
-
-// Start the server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Start the server after MySQL connection is initialized
+initDbConnection().then(() => {
+  app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+  });
 });

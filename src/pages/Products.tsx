@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { SpeechToText } from '../Components/SpeechToText';
 
 export interface Product {
   id: number;
@@ -20,66 +21,76 @@ export function Products() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [showDetails, setShowDetails] = useState<boolean>(false);
   const [docxContent, setDocxContent] = useState<string>(''); // State for DOCX content
+  const [products, setProducts] = useState<Product[]>([]); // State to store all products
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [conversation, setConversation] = useState<any[]>([]); // State to store conversation data
 
-  const products: Product[] = [
-    {
-      id: 1,
-      name: 'Kulvansh Male',
-      details: 'Natural infertility solution for males with improved sperm quality.',
-      price: '₹5300',
-      discountPrice: '₹4300',
-      isTrending: true,
-      image: 'https://vayuvedaorganics.com/kulvansh/male/image/improved%20Sperm%20Quality%20(2).webp',
-      ingredients: null,
-      benefits: null,
-      usage: null,
-      additionalInfo: null,
-      scriptdocx: 'path_to_your_script_file', // Add the path to your script docx file here
-    },
-    {
-      id: 2,
-      name: 'Kulvansh Female',
-      details: 'Infertility solution for females with herbal formulation.',
-      price: '₹5300',
-      discountPrice: '₹4300',
-      isTrending: true,
-      image: 'https://vayuvedaorganics.com/kulvansh/female/image/9.webp',
-      ingredients: null,
-      benefits: null,
-      usage: null,
-      additionalInfo: null,
-      scriptdocx: 'path_to_your_script_file', // Add the path to your script docx file here
-    },
-    {
-      id: 3,
-      name: 'Vayuveda Liver',
-      details: 'Herbal care for liver health with natural ingredients.',
-      price: '₹1199',
-      discountPrice: '₹799',
-      isTrending: true,
-      image: 'https://vayuvedaorganics.com/home/assets/images/1.png',
-      ingredients: null,
-      benefits: null,
-      usage: null,
-      additionalInfo: null,
-      scriptdocx: 'path_to_your_script_file', // Add the path to your script docx file here
-    },
-    {
-      id: 4,
-      name: 'Vayuveda Women Care',
-      details: 'Holistic women’s health solution for energy and hormonal balance.',
-      price: '₹1199',
-      discountPrice: '₹799',
-      isTrending: true,
-      image: 'https://vayuvedaorganics.com/home/assets/images/Women%20Care.png',
-      ingredients: null,
-      benefits: null,
-      usage: null,
-      additionalInfo: null,
-      scriptdocx: 'path_to_your_script_file', // Add the path to your script docx file here
-    },
-  ];
+  // Fetch products from the backend API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/products'); // Your API endpoint
+        if (response.ok) {
+          const data: Product[] = await response.json();
+          setProducts(data);
+        } else {
+          throw new Error('Failed to fetch products');
+        }
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
+    fetchProducts();
+  }, []);
+
+ // Function to fetch JSON content
+ const fetchJsonContent = async (jsonPath: string) => {
+  const fullPath = `${jsonPath}`;
+  console.log('Fetching JSON content from:', fullPath);
+  try {
+    const response = await fetch(fullPath);
+    console.log('Response Status:', response.status);
+    if (response.ok) {
+      const jsonData = await response.json(); // Parse JSON instead of text
+      console.log('Fetched JSON Content:', jsonData);
+      setDocxContent(JSON.stringify(jsonData, null, 2)); // Display formatted JSON content
+    } else {
+      console.error('Failed to fetch JSON content:', response.statusText);
+    }
+  } catch (err) {
+    console.error('Error fetching JSON content:', err);
+  }
+};
+
+// Automatically fetch .txt content when a product is selected
+useEffect(() => {
+  if (selectedProduct) {
+    fetchJsonContent(selectedProduct.scriptdocx); // Fetch JSON content when product is selected
+  }
+}, [selectedProduct]);
+
+  
+
+  useEffect(() => {
+    if (docxContent) {
+      try {
+        const parsedContent = JSON.parse(docxContent);
+        if (parsedContent.conversation) {
+          setConversation(parsedContent.conversation);
+        } else {
+          console.error('Conversation field missing in parsed content');
+        }
+      } catch (error) {
+        console.error('Error parsing docxContent:', error);
+      }
+    }
+  }, [docxContent]);
+
+  
   const handleBackToList = () => {
     setSelectedProduct(null);
     setShowDetails(false);
@@ -89,45 +100,35 @@ export function Products() {
     setShowDetails(!showDetails);
   };
 
-  const fetchDocxContent = async (docxPath: string) => {
-    // Fetch DOCX content from the given path
-    try {
-      const response = await fetch(docxPath);
-      if (response.ok) {
-        const data = await response.blob();
-        const text = await parseDocx(data); // Use a function to parse the DOCX
-        setDocxContent(text);
-      } else {
-        setDocxContent('Failed to load DOCX content.');
-      }
-    } catch (error) {
-      setDocxContent('Error fetching DOCX content.');
-    }
-  };
-
-  const parseDocx = (blob: Blob) => {
-    // Use a library or custom parsing logic to extract text from the DOCX file.
-    // Placeholder function: Implement DOCX parsing logic here
-    return 'Sample DOCX Content...'; // For now, just returning a placeholder
-  };
-
   const calculateDiscountPercentage = (price: string, discountPrice: string | null) => {
     if (!discountPrice) return 0; // No discount
     const originalPrice = parseFloat(price.replace('₹', ''));
     const discountedPrice = parseFloat(discountPrice.replace('₹', ''));
     return ((originalPrice - discountedPrice) / originalPrice) * 100;
   };
-
-  useEffect(() => {
-    if (selectedProduct) {
-      fetchDocxContent(selectedProduct.scriptdocx); // Fetch DOCX content based on selected product
+  
+  const renderConversation = (conversationData: any[]) => {
+    if (conversationData.length === 0) {
+      return <p className="text-gray-400">No conversation data available.</p>;
     }
-  }, [selectedProduct]);
-
+    return conversationData.map((item: any, index: number) => (
+      <div
+        key={index}
+        className={`p-2 mb-2 rounded-lg ${item.role === 'Agent' ? 'bg-blue-600' : 'bg-green-600'} text-white flex items-center space-x-3`}
+      >
+        <div
+          className={`w-6 h-6 rounded-full ${item.role === 'Agent' ? 'bg-blue-400' : 'bg-green-400'}`}
+        ></div>
+        <div className="flex-1">
+          <p className="font-semibold text-sm">{item.role === 'Agent' ? 'Agent' : 'Customer'}</p>
+          <p className="text-xs mt-1">{item.message}</p>
+        </div>
+      </div>
+    ));
+  };
+  
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold text-center mb-6">Product Catalog</h1>
-
       {/* Conditionally render list or details */}
       {selectedProduct ? (
         <div className="flex w-full">
@@ -161,8 +162,8 @@ export function Products() {
             </h2>
             <img
               src={selectedProduct.image}
-              alt={selectedProduct.name}
-              className="w-full h-48 object-cover rounded-lg my-4"
+              alt={selectedProduct.name} // Accessibility improvement: Adding alt text for images
+              className="w-full h-68 object-cover rounded-lg my-4"
             />
             <p>{selectedProduct.details}</p>
 
@@ -215,13 +216,17 @@ export function Products() {
               <h3 className="text-xl font-semibold mt-4">Usage Instructions:</h3>
               <p className="text-sm text-gray-300">{selectedProduct.usage}</p>
             </div>
-            {/* Display DOCX Content */}
+
             <div className="mt-6 bg-gray-800 p-4 rounded-lg">
-              <h3 className="text-xl font-semibold mb-4">Parsed DOCX Content:</h3>
+              <h3 className="text-xl font-semibold mb-4">Parsed TXT Content:</h3>
               <div className="max-h-64 overflow-y-auto border border-gray-700 rounded-md p-2 bg-gray-900">
-                <pre className="text-gray-300">{docxContent}</pre>
-              </div>
+              {conversation && renderConversation(conversation)}
             </div>
+            <div className="mt-6">
+              <h3 className="text-xl font-semibold mb-4">Speech to Text Component:</h3>
+              <SpeechToText selectedProductId={selectedProduct.id} />
+            </div>
+          </div>
           </div>
         </div>
       ) : (
@@ -247,7 +252,7 @@ export function Products() {
                     <td className="p-4">
                       <img
                         src={product.image}
-                        alt={product.name}
+                        alt={product.name} // Accessibility improvement: Adding alt text for images
                         className="w-16 h-16 object-cover rounded-lg"
                       />
                     </td>

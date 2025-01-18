@@ -10,9 +10,11 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+    "electron": "^34.0.0",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
-    "mysql": "^2.18.1"
+    "mysql": "^2.18.1",
+    "mysql2": "^3.12.0"
   },
   "keywords": [
     "nodejs",
@@ -23,5 +25,8 @@
   "author": "Harsh Khambra",
   "license": "ISC",
   "type": "commonjs",
-  "description": "A Node.js backend project with Express, CORS, MySQL, and JWT authentication."
+  "description": "A Node.js backend project with Express, CORS, MySQL, and JWT authentication.",
+  "devDependencies": {
+    "@types/node": "^22.10.6"
+  }
 }

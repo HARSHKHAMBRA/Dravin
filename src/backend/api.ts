@@ -2,7 +2,7 @@ import axios from "axios";
 
 
 const api = axios.create({
-  baseURL: "http://192.168.100.19:5060", // Replace with your API's URL
+  baseURL: "http://192.168.100.19", // Replace with your API's URL
 });
 // // Function to get available ports
 export const getAvailablePorts = async () => {

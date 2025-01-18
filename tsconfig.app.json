@@ -20,5 +20,5 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "backend/api.js"]
+  "include": ["src", "backend/api.ts"]
 }
