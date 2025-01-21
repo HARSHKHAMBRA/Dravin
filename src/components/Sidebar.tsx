@@ -28,7 +28,8 @@ import {
   DollarSign,     
   Package,        
   Clipboard,      
-  Shield,         
+  Shield,
+  Database // New icon for database config
 } from 'lucide-react';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -68,6 +69,8 @@ const menuItems = [
   { icon: MessageSquare, label: 'Live Chat', path: '/live-chat' },  
   { icon: Clipboard, label: 'Project Management', path: '/project-management' },  
   { icon: Shield, label: 'Security', path: '/security' },
+  // New Database Config menu item
+  { icon: Database, label: 'Database Config', path: '/database-config' },
 ];
 
 export function Sidebar() {
@@ -87,12 +90,12 @@ export function Sidebar() {
         </button>
       </div>
       
-      <nav className="mt-0 overflow-y-auto" style={{ height: 'calc(100vh - 60px)' }}>
+      <nav className="mt-0 overflow-y-auto" style={{ height: 'calc(100vh - 60px)', overflowY: 'auto' }}>
         {menuItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            className={({ isActive }) => `
+            className={({ isActive }) => ` 
               flex items-center px-4 py-3 text-gray-300 hover:bg-gray-800 hover:text-white transition-colors
               ${isActive ? 'bg-gray-800 text-white' : ''}`}
           >

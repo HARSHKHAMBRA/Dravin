@@ -61,6 +61,22 @@ app.get('/products/:id', async (req, res) => {
   }
 });
 
+// Endpoint to check if MySQL connection is active
+app.get('/api/check-connection', async (req, res) => {
+  try {
+    // Check if the MySQL pool is active by querying a simple command like SELECT 1
+    const [rows] = await pool.query('SELECT 1');
+    if (rows.length > 0) {
+      res.json({ success: true, message: 'Connection successful' });
+    } else {
+      res.json({ success: false, message: 'Connection failed' });
+    }
+  } catch (error) {
+    console.error('Database connection check failed:', error);
+    res.json({ success: false, message: 'Connection failed' });
+  }
+});
+
 // Start the server after MySQL connection is initialized
 initDbConnection().then(() => {
   app.listen(port, () => {

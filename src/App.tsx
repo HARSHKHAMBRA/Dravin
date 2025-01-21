@@ -14,7 +14,10 @@ import { Products } from "./pages/Products";
 import { BatchUpload } from "./pages/BatchUpload";
 import { CreateBatch } from "./components/CreateBatch";
 import { CallingPage } from "./components/CallingComponent";
+import { CallingDashboard } from "./components/callingdashboard";
 import { TxtContentPage } from "./components/TxtContentPage";
+import { DatabaseConfigPage } from "./pages/DatabaseConfigPage"; // Import the new page
+
 
 function App() {
   const handlePhoneCall = () => {
@@ -46,6 +49,8 @@ function App() {
             <Route path="/create-batch" element={<CreateBatch />} />
             <Route path="/calls-flow" element={<CallingPage />} />
             <Route path="/txt-content" element={<TxtContentPage />} />
+            <Route path="/calling-dashboard" element={<CallingDashboard />} />
+            <Route path="/database-config" element={<DatabaseConfigPage />} /> {/* New route */}
           </Routes>
 
           {/* Floating Action Button */}
